@@ -58,7 +58,11 @@ app:
 	dl	.data_end - .data
 	dl	.code - .header_start ; entry point
 	dl	0
-	dl	0 ; todo: library table
+	if defined app.library_table
+		dl app.library_table
+	else
+		dl 0
+	end if
 	dl	.info_string - .header_start
 	dl	0
 
@@ -136,6 +140,19 @@ $.app.data:
 
 	private	app.data
 	extern	__app_desc
+
+section .app.library_table
+	irpv export, app.exports
+		if % = 1
+			dl 'LIB',%%
+			app.library_table := $% - app.header_start
+		end if
+		@ez80.word export
+	end irpv
+
+	macro export? function
+		app.exports equ function
+	end macro
 
 section .app.footer
 app.data_end:
